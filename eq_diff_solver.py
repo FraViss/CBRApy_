@@ -15,10 +15,10 @@ def odefun(t,x,v): #v=params_log
 
     # cTnT
     Jsc_ctnt = (Cs_ctnt - Cc_ctnt)
-    Jcp_ctnt = 10 ** (a_log) * (Cc_ctnt - Cp_ctnt)
-    Jpm_ctnt = 10 ** (b_log) * Cp_ctnt
+    Jcp_ctnt = np.power(10, a_log) * (Cc_ctnt - Cp_ctnt)
+    Jpm_ctnt = np.power(10, b_log) * Cp_ctnt
 
-    G_sc = t ** 3 / (t ** 3 + 10 ** (3 * (Tsc_log)))
+    G_sc = np.power(t, 3)/ (np.power(t, 3) + np.power(10, (3 * (Tsc_log))))
 
     dCs_ctnt_tau = - Jsc_ctnt * G_sc
     dCc_ctnt_tau = Jsc_ctnt * G_sc - Jcp_ctnt
@@ -26,14 +26,17 @@ def odefun(t,x,v): #v=params_log
     d_concentration = [dCs_ctnt_tau, dCc_ctnt_tau, dCp_ctnt_tau]
 
     return d_concentration
-
+#time
 t=np.linspace(0,1,100)
 
-sol1=odeint(odefun,y0=[1,1,0],t=t,tfirst=True,args=[t,[1,2,3],[1,2,3]])
-#sol2=solve_ivp(odefun(t,[1,2,3],[1,2,3]),t_span=(0,max(t)),y0=[v0], t_eval=t)
+#initial conditions
+x0=[1,1,0]
 
-plt.plot(t,sol1)
-#plt.plot(t,sol2)
-plt.ylabel('$v(t)$')
-plt.xlabel('$t$')
+#solve
+x=odeint(odefun,x0,t,args=(1,2,3))
+
+#plot
+plt.plot(t,x)
+plt.legend('x(t)')
+plt.xlabel('t')
 plt.show()
