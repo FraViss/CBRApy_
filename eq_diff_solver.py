@@ -17,31 +17,30 @@ problema.
 x=[1,2,3]
 v=[1,1,0]
 
-#Variables
-Cs_ctnt = x[0]
-Cc_ctnt = x[1]
-Cp_ctnt = x[2]
-
-#Arguments
-a_log = v[0]
-b_log = v[1]
-Tsc_log = v[2]
-
-
-# cTnT
-Jsc_ctnt = Cs_ctnt - Cc_ctnt
-Jcp_ctnt = np.power(10, a_log) * (Cc_ctnt - Cp_ctnt)
-Jpm_ctnt = np.power(10, b_log) * Cp_ctnt
-
-#sigmoid curve
-G_sc = np.power(t, 3)/ (np.power(t, 3) + np.power(10, (3 * (Tsc_log))))
 
 def odefun(t,x,v): #v=params_log
 
+    # Variables
+    Cs_ctnt = x[0]
+    Cc_ctnt = x[1]
+    Cp_ctnt = x[2]
+
+    # Arguments
+    a_log = v[0]
+    b_log = v[1]
+    Tsc_log = v[2]
+
+    # cTnT
+    Jsc_ctnt = Cs_ctnt - Cc_ctnt
+    Jcp_ctnt = np.power(10, a_log) * (Cc_ctnt - Cp_ctnt)
+    Jpm_ctnt = np.power(10, b_log) * Cp_ctnt
+
+    # sigmoid curve
+    G_sc = np.power(t, 3) / (np.power(t, 3) + np.power(10, (3 * (Tsc_log))))
     #Differential equations
     dCs_ctnt_tau = - Jsc_ctnt * G_sc
     dCc_ctnt_tau = Jsc_ctnt * G_sc - Jcp_ctnt
-    dCp_ctnt_tau = Jcp_ctnt
+    dCp_ctnt_tau = Jcp_ctnt - Jpm_ctnt
 
     #Result
     d_concentration = [dCs_ctnt_tau, dCc_ctnt_tau, dCp_ctnt_tau]
@@ -49,19 +48,18 @@ def odefun(t,x,v): #v=params_log
     return d_concentration
 
 #initial conditions
-x1_0=x[0]
-x2_0=x[1]
-x3_0=x[2]
+x0=[1,1,0]
 
 #solve
-x1=odeint(odefun,x1_0,t,args=(v[0],))
-x2=odeint(odefun,x2_0,t,args=(v[1],))
-x3=odeint(odefun,x3_0,t,args=(v[2],))
+sol=odeint(odefun,x0,t,args=(v,))
+#solve alternativo
 
 #plot
-plt.plot(t,x1,'b',label='x1(t)')
-plt.plot(t,x2,'g',label='x2(t)')
-plt.plot(t,x3,'r',label='x3(t)')
-plt.legend(loc='best')
+plt.plot(t,sol,'b',label='x1(t)')
+plt.legend()
 plt.xlabel('t')
+plt.grid()
 plt.show()
+
+#x=7,3,0
+#v=-0.23,-1.02,1.85
