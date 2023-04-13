@@ -4,21 +4,7 @@ import scipy as sp
 from scipy.integrate import odeint
 from scipy.integrate import solve_ivp
 
-#time
-t=np.linspace(0,1,100,endpoint=False)
-
-'''
-Il problema è qui. La lunghezza del vettore 't' è n, mentre quella del vettore 'dt' nella
-funzione odeint è n-1. Perciò, credo che risolvendo questo "sfasamento" si risolva il
-problema.   
-'''
-
-#initializing
-x=[1,2,3]
-v=[1,1,0]
-
-
-def odefun(t,x,v): #v=params_log
+def odefun(t,x,params_log):
 
     # Variables
     Cs_ctnt = x[0]
@@ -26,9 +12,9 @@ def odefun(t,x,v): #v=params_log
     Cp_ctnt = x[2]
 
     # Arguments
-    a_log = v[0]
-    b_log = v[1]
-    Tsc_log = v[2]
+    a_log = params_log[0]
+    b_log = params_log[1]
+    Tsc_log = params_log[2]
 
     # cTnT
     Jsc_ctnt = Cs_ctnt - Cc_ctnt
@@ -49,17 +35,13 @@ def odefun(t,x,v): #v=params_log
 
 #initial conditions
 x0=[1,1,0]
+t=np.linspace(0,10,5)
+v=[1,1,0]
 
 #solve
 sol=odeint(odefun,x0,t,args=(v,))
-#solve alternativo
 
-#plot
-plt.plot(t,sol,'b',label='x1(t)')
-plt.legend()
-plt.xlabel('t')
-plt.grid()
-plt.show()
+print(sol)
 
 #x=7,3,0
 #v=-0.23,-1.02,1.85
