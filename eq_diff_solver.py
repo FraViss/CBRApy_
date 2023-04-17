@@ -4,17 +4,17 @@ import scipy as sp
 from scipy.integrate import odeint
 
 
-def odefun(t,*x,**params_log):
+def odefun(x,t,params_log):
 
     # Variables
-    Cs_ctnt = x[1]
-    Cc_ctnt = x[2]
-    Cp_ctnt = x[3]
+    Cs_ctnt = x[0]
+    Cc_ctnt = x[1]
+    Cp_ctnt = x[2]
 
     # Arguments
-    a_log = list(params_log.values())[0]
-    b_log = list(params_log.values())[1]
-    Tsc_log = list(params_log.values())[2]
+    a_log = params_log[0]
+    b_log = params_log[1]
+    Tsc_log = params_log[2]
 
     # cTnT
     Jsc_ctnt = Cs_ctnt - Cc_ctnt
@@ -35,14 +35,21 @@ def odefun(t,*x,**params_log):
     return d_concentration
 
 #initial conditions
-t=np.linspace(0,10,5)
-x0=np.array([1,2,3])
-params_log=np.array([1,1,0])
+t=np.linspace(0,10,100)
+x0=np.array([7,3,0])
+params_log=[1,1,0]
 
 #solve
-sol=odeint(odefun, y0=x0, t=t, args=(params_log[0],params_log[1],params_log[2]))
+sol=odeint(odefun, y0=x0, t=t, args=(params_log,))
 
-print(sol)
+#plot
+plt.plot(t,sol[:,0],label='Cs_ctnt')
+plt.plot(t,sol[:,1],label='Cc_ctnt')
+plt.plot(t,sol[:,2],label='Cp_ctnt')
+plt.xlabel('t')
+plt.legend()
+plt.show()
+
 
 #x=7,3,0
 #params_log=-0.23,-1.02,1.85
