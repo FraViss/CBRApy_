@@ -43,8 +43,8 @@ params_log=[1,1,0]
 sol=odeint(odefun, y0=x0, t=t, args=(params_log,))
 
 #plot
-plt.plot(t,sol[:,0],label='Cs_ctnt')
-plt.plot(t,sol[:,1],label='Cc_ctnt')
+#plt.plot(t,sol[:,0],label='Cs_ctnt')
+#plt.plot(t,sol[:,1],label='Cc_ctnt')
 plt.plot(t,sol[:,2],label='Cp_ctnt')
 plt.xlabel('t')
 plt.legend()
