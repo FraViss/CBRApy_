@@ -1,15 +1,14 @@
-
 function [T_stemi, X_stemi, params] = troponin_model(data, tempo, function_d, parameter_init, globalfunction, localfunction, number_point, lb, ub)
     
         params_init_log = log10(parameter_init);
     
 %% Lower and Upper Bounds
-        params_lb_log = log10(params_lb);
-        params_ub_log = log10(params_ub);
+        params_lb_log = log10(lb);
+        params_ub_log = log10(ub);
 
 %% Optimization function and data fitting 
 %     tic
-    func = @(params) function_d(params, data, tempo); %%%%%%%%%%%%%%%%%%%%%
+    func = @(params) function_d(params, data, tempo); %%%%%%%%%%%%%%%%%%%%%Funzione matlab eccetera...
 
     if (strcmp(globalfunction,'MultiStart')== 1)
 %         tic %%%%VVVVVVVVVVVVVVVVVV%%%%

@@ -11,4 +11,4 @@ parameter_init = [0.005 0.005 20 0.1 1]; % parametri iniziali
 number_point = 40; %25 1
 
 Obj_TroponinModel(parameter_init, data, tempo)
-troponin_model(data, tempo, function_d, parameter_init, globalfunction, localfunction, number_point, lb, ub)
+troponin_model(data, tempo, @Obj_TroponinModel, parameter_init, globalfunction, localfunction, number_point, lb, ub)
