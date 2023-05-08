@@ -8,7 +8,10 @@ ub = [5 5 300 200 400]; %upper bounds
 globalfunction = 'MultiStart'; % oppure 'particleswarm'
 localfunction = 'fmincon';
 parameter_init = [0.005 0.005 20 0.1 1]; % parametri iniziali
-number_point = 40; %25 1
+number_point = 25; %40 %25 1
 
-Obj_TroponinModel(parameter_init, data, tempo)
-troponin_model(data, tempo, @Obj_TroponinModel, parameter_init, globalfunction, localfunction, number_point, lb, ub)
+% Obj_TroponinModel(parameter_init, data, tempo)
+tic
+[T_stemi, X_stemi, params] = troponin_model(data, tempo, @Obj_TroponinModel, parameter_init, globalfunction, localfunction, number_point, lb, ub);
+disp(toc)
+plot(T_stemi,X_stemi(:,3));
