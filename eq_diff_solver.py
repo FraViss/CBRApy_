@@ -22,7 +22,7 @@ def odefun(x,t,params_log):
     Jpm_ctnt = np.power(10, b_log) * Cp_ctnt
 
     # sigmoid curve
-    G_sc = np.power(t, 3) / (np.power(t, 3) + np.power(10, (3 * (Tsc_log))))
+    G_sc = np.power(t, 3) / (np.power(t, 3) + np.power(10, (3 * Tsc_log)))
 
     #Differential equations
     dCs_ctnt_tau = - Jsc_ctnt * G_sc
