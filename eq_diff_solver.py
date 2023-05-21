@@ -39,6 +39,7 @@ t=np.linspace(0,10,100)
 x0=np.array([7,3,0])
 params_log=[1,1,0]
 
+
 #solve
 sol=odeint(odefun, y0=x0, t=t, args=(params_log,))
 
