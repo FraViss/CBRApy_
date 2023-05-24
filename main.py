@@ -4,7 +4,7 @@ import scipy.interpolate as sp_interp
 from scipy.integrate import odeint
 from pyomo.environ import ConcreteModel, Var, Objective
 from pyomo.opt import SolverFactory
-from pyomo.environ import RealSet
+from pyomo.environ import RealSet, Reals
 
 t = np.linspace(0, 10, 100)
 x = np.array([7, 3, 0])
@@ -22,9 +22,9 @@ def odefun(x, t, params_log):
     Cp_ctnt = x[2]
 
     # Arguments
-    a_log = params_log[0] if params_log[0] is not None else 0
-    b_log = params_log[1] if params_log[1] is not None else 0
-    Tsc_log = params_log[2] if params_log[2] is not None else 0
+    a_log = params_log[0] #if params_log[0] is not None else 0
+    b_log = params_log[1] #if params_log[1] is not None else 0
+    Tsc_log = params_log[2] #if params_log[2] is not None else 0
 
     # cTnT
     Jsc_ctnt = Cs_ctnt - Cc_ctnt
@@ -47,17 +47,22 @@ def odefun(x, t, params_log):
 
 def obj_troponinModel(params_log, data, time):
     t = np.linspace(0, max(time) * 1.6, 201)
-    params_log = np.array([10 ** p if p is not None and not np.isnan(p) else None for p in params_log])
+    params_log = np.array([10 ** p for p in params_log])
+    #params_log = np.array([10 ** p if p is not None and not np.isnan(p) else None for p in params_log])
 
     # Check if params contains None values
-    if np.any(params_log is None):
-        raise ValueError("Invalid parameter values")
+    # if np.any(params_log is None):
+    #     raise ValueError("Invalid parameter values")
 
-    x0 = np.array([params_log[-2], params_log[-1], 0])
+    # x0 = np.array([params_log[-2], params_log[-1], 0])
+    x0 = np.array([params_log[0], params_log[1], params_log[2]])
     X = odeint(odefun, x0, t, args=(params_log,))
-    cTnT_sim = sp_interp.interp1d(t + params_log[-1], X[:, 2], kind='cubic')
-    obj = np.sum(np.power(data - cTnT_sim(time), 2))
+    cTnT_sim = sp_interp.interp1d(t + params_log[-1], X[:, 2], kind='cubic') # approfondire interp1d # test linear e quadratic
+    obj = np.sum(np.power(data - cTnT_sim(time), 2)*data) # questa operazione va rivista aggiungere moltiplicazione per data
     return obj
+
+# Controllare se l'operazione di potenza e di moltiplicazione sono puntuali
+# np.power è puntuale
 
 def troponin_model(data, tempo, parameter_init, lb, ub):
     t_vec_stemi = np.linspace(0, int(max(tempo) + 50), int(max(tempo) + 51))
@@ -69,17 +74,18 @@ def troponin_model(data, tempo, parameter_init, lb, ub):
     model = ConcreteModel()
 
     # Define decision variables
-    model.param1 = Var(domain=RealSet, bounds=(params_lb_log[0], params_ub_log[0]), initialize=params_init_log[0])
-    model.param2 = Var(domain=RealSet, bounds=(params_lb_log[1], params_ub_log[1]), initialize=params_init_log[1])
+    model.param0 = Var(domain=Reals, bounds=(params_lb_log[0], params_ub_log[0]), initialize=params_init_log[0])
+    model.param1 = Var(domain=Reals, bounds=(params_lb_log[1], params_ub_log[1]), initialize=params_init_log[1])
+    model.param2 = Var(domain=Reals, bounds=(params_lb_log[2], params_ub_log[2]), initialize=params_init_log[2])
 
     def obj_rule(model):
-        return obj_troponinModel(np.array([model.param1.value, model.param2.value, 0]), data, tempo)
+        return obj_troponinModel(np.array([model.param0.value, model.param1.value, model.param2.value]), data, tempo)
 
     # Define the objective function
     model.obj = Objective(rule=obj_rule)
 
     # Solve the optimization problem
-    solver = SolverFactory('ipopt')
+    solver = SolverFactory('multistart') # ipopt da impostare
     solver.solve(model)
 
     # Retrieve the optimal parameter values
