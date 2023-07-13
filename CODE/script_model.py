@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import model_api as api
+from scipy.optimize import minimize, rosen
 
 
 # Data
@@ -13,14 +14,12 @@ lb = [0.001, 0.001, 20, 0.001, 0.1]
 ub = [5, 5, 300, 200, 400]
 parameter_init = [0.005, 0.005, 30, 0.1, 1]
 
+# print(api.obj_troponinModel(params_log, data, time))
+
 # Execution
-T_stemi, X_stemi, opt_params = api.troponin_model(data, time, parameter_init, lb, ub)
+result = minimize(api.obj_troponinModel, parameter_init, method='BFGS', args=(data, time))
 
+print(result)
+print("Parametri ottimizzati:", result.x)
+print("Valore minimo della funzione obiettivo:", result.fun)
 
-# Plot results
-plt.plot(T_stemi, X_stemi[:, 0], label='Variable 1')
-plt.plot(T_stemi, X_stemi[:, 1], label='Variable 2')
-plt.xlabel('Time')
-plt.ylabel('Value')
-plt.legend()
-plt.show()

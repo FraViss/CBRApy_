@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
-from scipy.integrate import odeint
+from scipy.integrate import odeint, solve_ivp
 
 
-def odefun(x,t,params_log):
+def odefun(t, x, params_log):
 
     # Variables
     Cs_ctnt = x[0]
@@ -41,12 +41,15 @@ params_log=[1,1,0]
 
 
 #solve
-sol=odeint(odefun, y0=x0, t=t, args=(params_log,))
-
+# sol=odeint(odefun, y0=x0, t=t, args=(params_log,))
+sol = solve_ivp(odefun, [0, 201], x0, 'RK23', args=(params_log,), t_eval=t)
+x1, x2, x3 = sol.y
+print(len(x3))
+print(len(t))
 #plot
 #plt.plot(t,sol[:,0],label='Cs_ctnt')
 #plt.plot(t,sol[:,1],label='Cc_ctnt')
-plt.plot(t,sol[:,2],label='Cp_ctnt')
+plt.plot(t,x3,label='Cp_ctnt')
 plt.xlabel('t')
 plt.legend()
 plt.show()

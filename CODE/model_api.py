@@ -46,7 +46,7 @@ def obj_troponinModel(params_log, data, time):
 
     x0 = np.array([params_log[0], params_log[1], params_log[2]])
     X = odeint(odefun, x0, t, args=(params_log,))
-    cTnT_sim = sp_interp.interp1d(t + params_log[-1], X[:, 2], kind='cubic', bounds_error=False) # approfondire interp1d # test linear e quadratic
+    cTnT_sim = sp_interp.interp1d(t + params_log[-1], X[:, 2], kind='cubic')
     obj = np.sum(np.power(data - cTnT_sim(time), 2)*data) # questa operazione va rivista aggiungere moltiplicazione per data
     
     return obj
