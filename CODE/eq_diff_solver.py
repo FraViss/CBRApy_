@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
+import scipy.interpolate as sp_interp
 from scipy.integrate import odeint
 
 
@@ -34,6 +35,16 @@ def odefun(x,t,params_log):
 
     return d_concentration
 
+def const_func(params, data, time):
+    t = np.linspace(0, max(time) * 1.6, 201)
+    params = np.array([10 ** p for p in params])
+    x0 = np.array([params[-2], params[-1], 0])
+    x = odeint(odefun, x0, t, args=(params,))
+    cTnT_sim = sp_interp.interp1d(t + params[-1], x[:, 2], kind='cubic',bounds_error=False) # approfondire interp1d # test linear e quadratic
+    obj = np.sum(np.power(data - cTnT_sim(time), 2)*data) # questa operazione va rivista aggiungere moltiplicazione per data
+    return obj
+
+'''
 #initial conditions
 t=np.linspace(0,10,100)
 x0=np.array([7,3,0])
@@ -54,3 +65,4 @@ plt.show()
 
 #x=7,3,0
 #params_log=-0.23,-1.02,1.85
+'''

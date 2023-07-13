@@ -1,6 +1,6 @@
 import numpy as np
 
-def odefun(t,x,v):
+def odefun1(t,x,v):
     Cs_ctnt = x[0]
     Cc_ctnt = x[1]
     Cp_ctnt = x[2]
