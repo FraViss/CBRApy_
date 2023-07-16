@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import scipy as sp
 import scipy.interpolate as sp_interp
 from scipy.integrate import odeint
-
+import scipy.stats as ss
 
 def odefun(x,t,params_log):
 
@@ -40,10 +40,32 @@ def const_func(params, data, time):
     params = np.array([10 ** p for p in params])
     x0 = np.array([params[-2], params[-1], 0])
     x = odeint(odefun, x0, t, args=(params,))
+
+    unique_x = np.unique(t + params[-1])
+    unique_t = np.unique(t)  # Add this line to obtain unique t values
+
+    # Interpolate using unique_t as the x-coordinates and x[:, 2] as the y-coordinates
+    cTnT_sim = sp_interp.interp1d(unique_x, x[:, 2], kind='cubic', bounds_error=False)
+
+    # Evaluate the interpolated function at the desired time points
+    cTnT_sim_vals = cTnT_sim(unique_t)
+
+    # Interpolate the simulated values at the actual time points
+    interpolated_vals = sp_interp.interp1d(unique_t, cTnT_sim_vals, kind='cubic', bounds_error=False)
+
+    obj = np.sum(np.power(data - interpolated_vals(time), 2) * data)
+    return obj
+
+'''
+def const_func(params, data, time):
+    t = np.linspace(0, max(time) * 1.6, 201)
+    params = np.array([10 ** p for p in params])
+    x0 = np.array([params[-2], params[-1], 0])
+    x = odeint(odefun, x0, t, args=(params,))
     cTnT_sim = sp_interp.interp1d(t + params[-1], x[:, 2], kind='cubic',bounds_error=False) # approfondire interp1d # test linear e quadratic
     obj = np.sum(np.power(data - cTnT_sim(time), 2)*data) # questa operazione va rivista aggiungere moltiplicazione per data
     return obj
-
+'''
 '''
 #initial conditions
 t=np.linspace(0,10,100)
