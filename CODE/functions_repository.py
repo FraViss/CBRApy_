@@ -34,6 +34,14 @@ def odefun(x,t,params_log):
     d_concentration = [dCs_ctnt_tau, dCc_ctnt_tau, dCp_ctnt_tau]
 
     return d_concentration
+def const_func0(parameter_init, data, time):
+    params = 10 ** parameter_init
+    x0 = [params[-2], params[-1], 0]
+    t_vec = np.linspace(0, time[-1] * 1.6, 201)
+    X = odeint(lambda x, t: odefun(x, t, params), x0, t_vec)
+    cTnT_sim = sp_interp.interp1d(t_vec, X[:, 2])(time)
+    obj = np.sum(((data - cTnT_sim) ** 2) * data)
+    return obj
 
 def const_func(params, data, time):
     t = np.linspace(0, max(time) * 1.6, 201)
@@ -56,8 +64,10 @@ def const_func(params, data, time):
     obj = np.sum(np.power(data - interpolated_vals(time), 2) * data)
     return obj
 
-'''
-def const_func(params, data, time):
+
+
+
+def const_func1(params, data, time):
     t = np.linspace(0, max(time) * 1.6, 201)
     params = np.array([10 ** p for p in params])
     x0 = np.array([params[-2], params[-1], 0])
@@ -65,7 +75,6 @@ def const_func(params, data, time):
     cTnT_sim = sp_interp.interp1d(t + params[-1], x[:, 2], kind='cubic',bounds_error=False) # approfondire interp1d # test linear e quadratic
     obj = np.sum(np.power(data - cTnT_sim(time), 2)*data) # questa operazione va rivista aggiungere moltiplicazione per data
     return obj
-'''
 '''
 #initial conditions
 t=np.linspace(0,10,100)
