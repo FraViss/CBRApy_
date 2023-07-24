@@ -39,6 +39,7 @@ function [T_stemi, X_stemi, params] = troponin_model(data, tempo, function_d, pa
 %         assignin("base", "ms", ms);
 %         assignin("base", "problem", problem);
 %         assignin("base", "number_point", number_point);
+        % ms.UseParallel = true;
         [params,obj_val] = run (ms, problem, number_point); %%%%%%%%%%%%%%%%%%%%%%%%
 %         disp(string(toc))
     else

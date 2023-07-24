@@ -13,10 +13,11 @@
     Jcp_ctnt = 10^(a_log)*(Cc_ctnt - Cp_ctnt);
     Jpm_ctnt = 10^(b_log)*Cp_ctnt;
 
-    G_sc = t^3/(t^3 + 10^(3*(Tsc_log)));
+    G_sc = t^3/(t^3 + 10^(3*(Tsc_log))); % funzione tempo che va a modulare la curva
+
     dCs_ctnt_tau = - Jsc_ctnt*G_sc;
     dCc_ctnt_tau =   Jsc_ctnt*G_sc - Jcp_ctnt;
     dCp_ctnt_tau =   Jcp_ctnt - Jpm_ctnt;
-    d_concentration = [dCs_ctnt_tau; dCc_ctnt_tau; dCp_ctnt_tau];
 
+    d_concentration = [dCs_ctnt_tau; dCc_ctnt_tau; dCp_ctnt_tau];
 end
