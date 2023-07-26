@@ -1,11 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import scipy as sp
 import scipy.interpolate as sp_interp
-from scipy.integrate import odeint
-import scipy.stats as ss
+from scipy.integrate import odeint, solve_ivp
+import matplotlib.pyplot as plt
 
-def odefun(x,t,params_log):
+
+def odefun(t,x,params_log):
 
     # Variables
     Cs_ctnt = x[0]
@@ -34,66 +33,85 @@ def odefun(x,t,params_log):
     d_concentration = [dCs_ctnt_tau, dCc_ctnt_tau, dCp_ctnt_tau]
 
     return d_concentration
-def const_func0(parameter_init, data, time):
-    params = 10 ** parameter_init
-    x0 = [params[-2], params[-1], 0]
+
+def objective_func(parameter_init, data, time):
+    #params = 10 ** parameter_init
+    params = np.array(np.power(10, parameter_init))
+    x0 = np.array([params[-2], params[-1], 0])
     t_vec = np.linspace(0, time[-1] * 1.6, 201)
-    X = odeint(lambda x, t: odefun(x, t, params), x0, t_vec)
-    cTnT_sim = sp_interp.interp1d(t_vec, X[:, 2])(time)
+    res = solve_ivp(lambda t, x: odefun(t, x, params),[t_vec[0], t_vec[-1]], x0, 'RK23', t_eval=t_vec)
+    x1, x2, x3 = res.y
+    cTnT_sim = sp_interp.interp1d(t_vec, x3)(time)
     obj = np.sum(((data - cTnT_sim) ** 2) * data)
     return obj
 
-def const_func(params, data, time):
-    t = np.linspace(0, max(time) * 1.6, 201)
-    params = np.array([10 ** p for p in params])
-    x0 = np.array([params[-2], params[-1], 0])
-    x = odeint(odefun, x0, t, args=(params,))
+class ObjectiveFunction:
+    def __init__(self, data, time):
+        self.data = data
+        self.time = time
 
-    unique_x = np.unique(t + params[-1])
-    unique_t = np.unique(t)  # Add this line to obtain unique t values
-
-    # Interpolate using unique_t as the x-coordinates and x[:, 2] as the y-coordinates
-    cTnT_sim = sp_interp.interp1d(unique_x, x[:, 2], kind='cubic', bounds_error=False)
-
-    # Evaluate the interpolated function at the desired time points
-    cTnT_sim_vals = cTnT_sim(unique_t)
-
-    # Interpolate the simulated values at the actual time points
-    interpolated_vals = sp_interp.interp1d(unique_t, cTnT_sim_vals, kind='cubic', bounds_error=False)
-
-    obj = np.sum(np.power(data - interpolated_vals(time), 2) * data)
-    return obj
+    def __call__(self, parameter_init):
+        params = np.array(np.power(10, parameter_init))
+        x0 = np.array([params[-2], params[-1], 0])
+        t_vec = np.linspace(0, self.time[-1] * 1.6, 201)
+        res = solve_ivp(lambda t, x: odefun(t, x, params),[t_vec[0], t_vec[-1]], x0, 'RK23', t_eval=t_vec)
+        x1, x2, x3 = res.y
+        cTnT_sim = sp_interp.interp1d(t_vec, x3)(self.time)
+        obj = np.sum(((self.data - cTnT_sim) ** 2) * self.data)
+        return obj
 
 
+if __name__=="__main__":
+    print("Test odefun non optimized.")
+    data = [1.4300, 1.0900, 0.9820, 1.2200, 1.2600, 0.5410]  # array concentrazione troponina
+    time = [5.1333, 6.2833, 13.1833, 29.9167, 53.8500, 77.2167]  # array tempi di acquisizione troponina
+    parameter_init = [0.005, 0.005, 30, 0.1, 1]
+    print("parameter_init: ",parameter_init)
+    params=np.log10(parameter_init)
+    print("log10_parameter_init: ",params)
+    x0=[params[-2],params[-1],0]
+    t_vec_stemi= np.linspace(0, max(time)*1.6, 201)
+    sol = solve_ivp(odefun, [t_vec_stemi[0], t_vec_stemi[-1]], x0, 'RK23', args=(params,), t_eval=t_vec_stemi)
+    x1, x2, x3 = sol.y
+    #Plot test
+    plt.figure()
+    plt.plot(t_vec_stemi, x3, label='Sol')
+    plt.xlabel('Time')
+    plt.ylabel('Concentration of troponin')
+    plt.legend()
+    plt.show()
 
-
-def const_func1(params, data, time):
-    t = np.linspace(0, max(time) * 1.6, 201)
-    params = np.array([10 ** p for p in params])
-    x0 = np.array([params[-2], params[-1], 0])
-    x = odeint(odefun, x0, t, args=(params,))
-    cTnT_sim = sp_interp.interp1d(t + params[-1], x[:, 2], kind='cubic',bounds_error=False) # approfondire interp1d # test linear e quadratic
-    obj = np.sum(np.power(data - cTnT_sim(time), 2)*data) # questa operazione va rivista aggiungere moltiplicazione per data
-    return obj
-'''
-#initial conditions
-t=np.linspace(0,10,100)
-x0=np.array([7,3,0])
-params_log=[1,1,0]
-
-
-#solve
-sol=odeint(odefun, y0=x0, t=t, args=(params_log,))
-
-#plot
-#plt.plot(t,sol[:,0],label='Cs_ctnt')
-#plt.plot(t,sol[:,1],label='Cc_ctnt')
-plt.plot(t,sol[:,2],label='Cp_ctnt')
-plt.xlabel('t')
-plt.legend()
-plt.show()
-
-
-#x=7,3,0
-#params_log=-0.23,-1.02,1.85
-'''
+    print("Test odefun optimized")
+    best_params =[0.5941, 0.095959, 70.1804, 7.058, 3.2886]
+    print("best_params: ",best_params)
+    params_log = np.log10(best_params)
+    print("log10: ",params_log)
+    x0 = [params_log[-2], params_log[-1], 0]
+    t_vec_stemi = np.linspace(0, max(time) * 1.6, 201)
+    sol1 = solve_ivp(odefun, [t_vec_stemi[0], t_vec_stemi[-1]], x0, 'RK23', args=(params_log,), t_eval=t_vec_stemi)
+    x_1, x_2, x_3 = sol1.y
+    # Plot test
+    plt.figure()
+    plt.plot(t_vec_stemi, x_3, label='Sol1')
+    plt.xlabel('Time')
+    plt.ylabel('Concentration of troponin')
+    plt.legend()
+    plt.show()
+    '''
+    X = odeint(lambda x, t: odefun(t,x, params_log), x0, t_vec_stemi)
+    plt.plot(t_vec_stemi, X[:,2], label='Test plot')
+    plt.xlabel('Time')
+    plt.ylabel('Concentration of troponin')
+    plt.legend()
+    plt.show()
+    '''
+    #sol1 = solve_ivp(odefun, [t_vec_stemi[0], t_vec_stemi[-1]], x0, 'RK23', args=(params_log,), t_eval=t_vec_stemi)
+    #x_1, x_2, x_3 = sol1.y
+    X = solve_ivp(lambda t,x: odefun(t, x, params_log), [t_vec_stemi[0], t_vec_stemi[-1]],x0,'RK23', t_eval=t_vec_stemi)
+    x1_,x2_,x3_=X.y
+    plt.figure()
+    plt.plot(t_vec_stemi, x3, label='X')
+    plt.xlabel('Time')
+    plt.ylabel('Concentration of troponin')
+    plt.legend()
+    plt.show()

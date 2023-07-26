@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import odeint
 from scipy.optimize import minimize, basinhopping
-import eq_diff_solver as odefun
+import CODE.functions_repository as odefun
 import scipy as sp
 from pyomo.environ import *
 

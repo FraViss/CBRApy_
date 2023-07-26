@@ -1,7 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
-import model_api as api
-
+from Test import model_api as api
 
 # Data
 # t = np.linspace(0, 10, 100)
