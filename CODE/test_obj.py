@@ -5,6 +5,7 @@ from scipy.optimize import minimize,basinhopping
 import matplotlib.pyplot as plt
 from functions_repository import odefun, objective_func,ObjectiveFunction
 
+
 #Test
 #params = [0.0050, 0.0050, 67.6505, 0.1000, 1.0000]
 data = [1.4300, 1.0900, 0.9820, 1.2200, 1.2600, 0.5410] #array concentrazione troponina
@@ -18,8 +19,9 @@ ub = [5, 5, 300, 200, 400]  # upper bounds
 params_lb_log = np.log10(lb)
 params_ub_log = np.log10(ub)
 
-func = lambda parameter_init: objective_func(parameter_init, data, time)
+func = lambda params_init_log: objective_func(params_init_log, data, time)
 # Optimization problem
+
 problem = {
     'fun': func,
     'x0': params_init_log,
@@ -32,17 +34,12 @@ problem = {
 result = minimize(**problem)
 
 sol = result.x
+best_params_linear = np.power(10, sol)
 
 print("Optimal parameters: ", result.x)
 print("Success: ", result.success)
 print("Status: ", result.status)
 print("Message: ", result.message)
-
-#Basinhopping
-obj_func=ObjectiveFunction(data,time)
-minimizer_kwargs = {"method": "BFGS"}
-ret=basinhopping(obj_func,x0=(parameter_init),minimizer_kwargs = minimizer_kwargs,niter=100)
-print("global minimum: x = %.4f, f(x) = %.4f" % (ret.x, ret.fun))
 
 # Get the optimized parameters
 params_opt = 10 ** sol
@@ -85,5 +82,5 @@ RISULTATI:
 1. Rinominato const_func0 con objective_func. value=4.8178. Molto vicino a quello di MatLab.
 2. Non da gli stessi valori, infatti result.x=[-3, -3, 1.47712125, -0.99551412, 1.38191631] che è diversa da fmincon.
 Credo che sia un vettore equivalente.
-3. L'algoritmo basinhopping mi da un loop infinito...
+3. L'algoritmo basinhopping rimane bloccato.
 '''

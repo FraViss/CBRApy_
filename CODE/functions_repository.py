@@ -34,9 +34,9 @@ def odefun(t,x,params_log):
 
     return d_concentration
 
-def objective_func(parameter_init, data, time):
+def objective_func(params_init_log, data, time):
     #params = 10 ** parameter_init
-    params = np.array(np.power(10, parameter_init))
+    params = np.array(np.power(10, params_init_log))
     x0 = np.array([params[-2], params[-1], 0])
     t_vec = np.linspace(0, time[-1] * 1.6, 201)
     res = solve_ivp(lambda t, x: odefun(t, x, params),[t_vec[0], t_vec[-1]], x0, 'RK23', t_eval=t_vec)
@@ -50,8 +50,8 @@ class ObjectiveFunction:
         self.data = data
         self.time = time
 
-    def __call__(self, parameter_init):
-        params = np.array(np.power(10, parameter_init))
+    def __call__(self, params_init_log):
+        params = np.array(np.power(10, params_init_log))
         x0 = np.array([params[-2], params[-1], 0])
         t_vec = np.linspace(0, self.time[-1] * 1.6, 201)
         res = solve_ivp(lambda t, x: odefun(t, x, params),[t_vec[0], t_vec[-1]], x0, 'RK23', t_eval=t_vec)
