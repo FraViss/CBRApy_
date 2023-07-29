@@ -43,6 +43,7 @@ print("Message: ", result.message)
 #Test
 value=obj_func(result.x,data,time)
 print("Test: ",value)
+
 '''
 # Get the optimized parameters
 params_opt = 10 ** sol
@@ -85,4 +86,3 @@ RISULTATI:
 3. L'algoritmo basinhopping funziona, ma non da i best_params di MatLab.
 '''
 
-#assert da fare
