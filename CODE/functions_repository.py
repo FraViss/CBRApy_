@@ -33,7 +33,7 @@ def odefun(t,x,params_log):
     d_concentration = [dCs_ctnt_tau, dCc_ctnt_tau, dCp_ctnt_tau]
 
     return d_concentration
-
+'''
 def objective_func(params_init_log, data, time):
     #params = 10 ** parameter_init
     params = np.array(np.power(10, params_init_log))
@@ -44,21 +44,19 @@ def objective_func(params_init_log, data, time):
     cTnT_sim = sp_interp.interp1d(t_vec, x3)(time)
     obj = np.sum(((data - cTnT_sim) ** 2) * data)
     return obj
+'''
 
-class ObjectiveFunction:
-    def __init__(self, data, time):
-        self.data = data
-        self.time = time
-
-    def __call__(self, params_init_log):
-        params = np.array(np.power(10, params_init_log))
-        x0 = np.array([params[-2], params[-1], 0])
-        t_vec = np.linspace(0, self.time[-1] * 1.6, 201)
-        res = solve_ivp(lambda t, x: odefun(t, x, params),[t_vec[0], t_vec[-1]], x0, 'RK23', t_eval=t_vec)
-        x1, x2, x3 = res.y
-        cTnT_sim = sp_interp.interp1d(t_vec, x3)(self.time)
-        obj = np.sum(((self.data - cTnT_sim) ** 2) * self.data)
-        return obj
+#FUNZIONE OBIETTIVO MIGLIORE!
+def obj_func(params_init_log, data, time):
+    #params = 10 ** parameter_init
+    params = np.array(np.power(10, params_init_log))
+    x0 = np.array([params[-2], params[-1], 0])
+    t_vec = np.linspace(0, time[-1] * 1.6, 201)
+    res = odeint(lambda x,t: odefun(t, x, params), x0, t_vec)
+    x1, x2, x3 = res.T
+    cTnT_sim = sp_interp.interp1d(t_vec+params[-1], x3, bounds_error=False, fill_value="extrapolate")(time)
+    obj = np.sum(((data - cTnT_sim) ** 2) * data)
+    return obj
 
 
 if __name__=="__main__":
@@ -82,7 +80,9 @@ if __name__=="__main__":
     plt.show()
 
     print("Test odefun optimized")
-    best_params =[0.5941, 0.095959, 70.1804, 7.058, 3.2886]
+    #best_params =[0.5941, 0.095959, 70.1804, 7.058, 3.2886]
+    best_params=[-3. ,        -3.,          1.52613105 ,-0.71888118,  1.38195932]
+    best_params=np.power(10,best_params)
     print("best_params: ",best_params)
     params_log = np.log10(best_params)
     print("log10: ",params_log)

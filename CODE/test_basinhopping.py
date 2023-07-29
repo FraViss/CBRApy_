@@ -2,7 +2,7 @@ import numpy as np
 from scipy.optimize import basinhopping, Bounds
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
-from functions_repository import odefun,objective_func
+from functions_repository import odefun,obj_func
 
 # Parameters and initial conditions
 data = np.array([1.4300, 1.0900, 0.9820, 1.2200, 1.2600, 0.5410])  # array concentration troponin
@@ -20,10 +20,14 @@ params_ub_log = np.log10(ub)
 
 bounds = Bounds(params_lb_log, params_ub_log)
 
-func = lambda params_init_log: objective_func(params_init_log, data, tempo)
+func = lambda params_init_log: obj_func(params_init_log, data, tempo)
+
+def print_fun(x, f, accepted):
+    print("at minimum %.4f accepted %d" % (f, int(accepted)))
+
 # Optimization using Basin-hopping
 minimizer_kwargs = {"method": "L-BFGS-B", "bounds": bounds}
-result = basinhopping(func, params_init_log, minimizer_kwargs=minimizer_kwargs, niter=100, stepsize=5.0,disp=True)
+result = basinhopping(func, params_init_log, minimizer_kwargs=minimizer_kwargs, niter=15, stepsize=0.1,disp=True,callback=print_fun)
 
 # Optimized parameters
 best_params = result.x
