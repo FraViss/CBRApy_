@@ -5,7 +5,6 @@ from scipy.optimize import minimize,basinhopping
 import matplotlib.pyplot as plt
 from functions_repository import odefun,obj_func
 
-
 #Test
 #params = [0.0050, 0.0050, 67.6505, 0.1000, 1.0000]
 data = [1.4300, 1.0900, 0.9820, 1.2200, 1.2600, 0.5410] #array concentrazione troponina

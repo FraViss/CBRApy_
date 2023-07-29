@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 
 
 def odefun(t,x,params_log):
-
     # Variables
     Cs_ctnt = x[0]
     Cc_ctnt = x[1]

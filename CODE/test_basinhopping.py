@@ -24,7 +24,6 @@ func = lambda params_init_log: obj_func(params_init_log, data, tempo)
 
 def print_fun(x, f, accepted):
     print("at minimum %.4f accepted %d" % (f, int(accepted)))
-
 # Optimization using Basin-hopping
 minimizer_kwargs = {"method": "L-BFGS-B", "bounds": bounds}
 result = basinhopping(func, params_init_log, minimizer_kwargs=minimizer_kwargs, niter=15, stepsize=0.1,disp=True,callback=print_fun)
