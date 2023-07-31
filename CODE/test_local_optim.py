@@ -1,9 +1,10 @@
 import numpy as np
 import scipy.interpolate as sp_interp
 from scipy.integrate import odeint,solve_ivp
-from scipy.optimize import minimize,basinhopping
+from scipy.optimize import minimize,optimize
 import matplotlib.pyplot as plt
-from functions_repository import odefun,obj_func
+from functions_repository import odefun,cost_function
+
 
 #Test
 #params = [0.0050, 0.0050, 67.6505, 0.1000, 1.0000]
@@ -19,16 +20,17 @@ ub = [5, 5, 300, 200, 400]  # upper bounds
 params_lb_log = np.log10(lb)
 params_ub_log = np.log10(ub)
 
-func = lambda params_init_log: obj_func(params_init_log, data, time)
-# Optimization problem
+func = lambda params_init_log: cost_function(time,params_init_log,data)
 
+# Optimization problem
 problem = {
-    'fun': func,
-    'x0': params_init_log,
-    'bounds': list(zip(params_lb_log, params_ub_log)),
-    'method': 'SLSQP',
-    'options': {'maxiter': 1000,"disp":True}
+    'fun': func
+    ,'x0': params_init_log
+    ,'bounds': list(zip(params_lb_log, params_ub_log))
+    ,'method': 'SLSQP'
+    ,'options': {"disp":True}
 }
+#Provare analoghi fmincon diversi da minimize
 
 # Solve the optimization problem
 result = minimize(**problem)
@@ -36,12 +38,13 @@ result = minimize(**problem)
 sol = result.x
 best_params_linear = np.power(10, sol)
 
-print("Optimal parameters: ", result.x)
+print("Optimal parameters log: ", result.x)
+print("Optimal parameters: ",best_params_linear)
 print("Success: ", result.success)
 print("Status: ", result.status)
 print("Message: ", result.message)
 #Test
-value=obj_func(result.x,data,time)
+value=cost_function(time,result.x,data)
 print("Test: ",value)
 
 '''

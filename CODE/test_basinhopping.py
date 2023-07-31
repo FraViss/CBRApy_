@@ -2,11 +2,11 @@ import numpy as np
 from scipy.optimize import basinhopping, Bounds
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
-from functions_repository import odefun,obj_func
+from functions_repository import odefun,cost_function
 
 # Parameters and initial conditions
 data = np.array([1.4300, 1.0900, 0.9820, 1.2200, 1.2600, 0.5410])  # array concentration troponin
-tempo = np.array([5.1333, 6.2833, 13.1833, 29.9167, 53.8500, 77.2167])  # array acquisition times troponin
+time = np.array([5.1333, 6.2833, 13.1833, 29.9167, 53.8500, 77.2167])  # array acquisition times troponin
 parameter_init = np.array([0.005, 0.005, 30, 0.1, 1])
 
 lb = np.array([0.001, 0.001, 20, 0.001, 0.1])  # lower bounds
@@ -20,20 +20,21 @@ params_ub_log = np.log10(ub)
 
 bounds = Bounds(params_lb_log, params_ub_log)
 
-func = lambda params_init_log: obj_func(params_init_log, data, tempo)
+func = lambda params_init_log: cost_function(time,params_init_log,data)
 
 def print_fun(x, f, accepted):
     print("at minimum %.4f accepted %d" % (f, int(accepted)))
 # Optimization using Basin-hopping
-minimizer_kwargs = {"method": "L-BFGS-B", "bounds": bounds}
-result = basinhopping(func, params_init_log, minimizer_kwargs=minimizer_kwargs, niter=15, stepsize=0.1,disp=True,callback=print_fun)
+minimizer_kwargs = {"method": "Powell", "bounds": bounds}
+result = basinhopping(func, params_init_log, minimizer_kwargs=minimizer_kwargs,
+                      niter=10, stepsize=0.01,disp=True,callback=print_fun)
 
 # Optimized parameters
 best_params = result.x
-print(best_params)
+print("Best params: ",best_params)
 
 x0_best = np.array([best_params[-2], best_params[-1], 0])
-t_vec_stemi = np.linspace(0, tempo[-1]*1.6, 201)
+t_vec_stemi = np.linspace(0, time[-1]*1.6, 201)
 
 # Solve ODE
 X_stemi = odeint(lambda x, t: odefun(t, x, best_params), x0_best, t_vec_stemi)
