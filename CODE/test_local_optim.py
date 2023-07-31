@@ -46,6 +46,24 @@ print("Message: ", result.message)
 value=cost_function(time,result.x,data)
 print("Test: ",value)
 
+print("Test SLSQP")
+# best_params_slsqp =[0.68414505, 0.1110646, 71.28444528, 8.05371601, 3.42948988]
+print("best_params: ", best_params_linear)
+params_log = np.log10(best_params_linear)
+print("log10: ",params_log)
+x0 = [10**params_log[-2], 10**params_log[-1], 0]
+t_vec_stemi = np.linspace(0, max(time) * 1.6, 201)
+sol1 = solve_ivp(odefun, [t_vec_stemi[0], t_vec_stemi[-1]], x0, 'RK23', args=(params_log,), t_eval=t_vec_stemi)
+x_1, x_2, x_3 = sol1.y
+# Plot test
+plt.figure()
+plt.plot(t_vec_stemi, x_3, label='Locally py optim')
+plt.title("Local SLSQP optimized")
+plt.xlabel('Time')
+plt.ylabel('Concentration of troponin')
+plt.legend()
+plt.show()
+
 '''
 # Get the optimized parameters
 params_opt = 10 ** sol
