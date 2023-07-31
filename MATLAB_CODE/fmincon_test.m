@@ -29,9 +29,13 @@ params_optim = fmincon(problem);
 
 %% Optimized plot
 best_params = params_optim;
-disp(best_params)
-x0_best = [best_params(end-1) best_params(end) 0]';
+disp(func(best_params))
+disp(10.^(best_params))
+x0_best = [10^(best_params(end-1)) 10^(best_params(end)) 0]';
+
+t_vec_stemi = linspace(0,tempo(end)*1.6,201);
 
 [T_stemi, X_stemi] = ode23(@(t,x) odefun(t, x, best_params), t_vec_stemi, x0_best);
 figure(1)
 plot(T_stemi, X_stemi(:,3));
+

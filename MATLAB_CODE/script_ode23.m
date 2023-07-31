@@ -2,7 +2,7 @@
 tempo = [5.1333 6.2833 13.1833 29.9167 53.8500 77.2167];
 data = [1.43 1.09 0.982 1.22 1.26 0.541];
 
-t_vec_stemi = linspace(0,tempo(end)+50,tempo(end)+51);
+t_vec_stemi = linspace(0,tempo(end)*1.6,201);
 
 parameter_init = [0.005 0.005 30 0.1 1];
 lb = [0.001 0.001 20 0.001 0.1];
