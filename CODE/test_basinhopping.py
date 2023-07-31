@@ -17,7 +17,6 @@ params_init_log = np.log10(parameter_init)
 # Lower and Upper Bounds
 params_lb_log = np.log10(lb)
 params_ub_log = np.log10(ub)
-
 bounds = Bounds(params_lb_log, params_ub_log)
 
 func = lambda params_init_log: cost_function(time,params_init_log,data)

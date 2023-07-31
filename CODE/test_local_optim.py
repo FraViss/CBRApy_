@@ -21,7 +21,6 @@ params_lb_log = np.log10(lb)
 params_ub_log = np.log10(ub)
 
 func = lambda params_init_log: cost_function(time,params_init_log,data)
-
 # Optimization problem
 problem = {
     'fun': func
