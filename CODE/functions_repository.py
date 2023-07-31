@@ -102,13 +102,32 @@ if __name__=="__main__":
     plt.legend()
     plt.show()
     '''
-    #sol1 = solve_ivp(odefun, [t_vec_stemi[0], t_vec_stemi[-1]], x0, 'RK23', args=(params_log,), t_eval=t_vec_stemi)
-    #x_1, x_2, x_3 = sol1.y
-    X = solve_ivp(lambda t,x: odefun(t, x, params_log), [t_vec_stemi[0], t_vec_stemi[-1]],x0,'RK23', t_eval=t_vec_stemi)
-    x1_,x2_,x3_=X.y
+
+    
+    print("Test local odefun optimized")
+    fmincon_params = [-0.8403, -1.7972, 1.8891, -0.3495, 0.6547]
+    print("best_params: ", fmincon_params)
+    # params_log = np.log10(fmincon_params)
+    params_log = fmincon_params
+    print("log10: ",params_log)
+    x0 = [params_log[-2], params_log[-1], 0]
+    t_vec_stemi = np.linspace(0, max(time) * 1.6, 201)
+    sol1 = solve_ivp(odefun, [t_vec_stemi[0], t_vec_stemi[-1]], x0, 'RK23', args=(params_log,), t_eval=t_vec_stemi)
+    x_1, x_2, x_3 = sol1.y
+    # Plot test
     plt.figure()
-    plt.plot(t_vec_stemi, x3, label='X')
+    plt.plot(t_vec_stemi, x_3, label='Sol1')
     plt.xlabel('Time')
     plt.ylabel('Concentration of troponin')
     plt.legend()
     plt.show()
+    #sol1 = solve_ivp(odefun, [t_vec_stemi[0], t_vec_stemi[-1]], x0, 'RK23', args=(params_log,), t_eval=t_vec_stemi)
+    #x_1, x_2, x_3 = sol1.y
+    # X = solve_ivp(lambda t,x: odefun(t, x, params_log), [t_vec_stemi[0], t_vec_stemi[-1]],x0,'RK23', t_eval=t_vec_stemi)
+    # x1_,x2_,x3_=X.y
+    # plt.figure()
+    # plt.plot(t_vec_stemi, x3, label='X')
+    # plt.xlabel('Time')
+    # plt.ylabel('Concentration of troponin')
+    # plt.legend()
+    # plt.show()
