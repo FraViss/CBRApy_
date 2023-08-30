@@ -3,7 +3,7 @@ import scipy.interpolate as sp_interp
 from scipy.integrate import odeint,solve_ivp
 from scipy.optimize import minimize,optimize
 import matplotlib.pyplot as plt
-from functions_repository import odefun,cost_function
+from functions_repository import odefun,cost_function,fmincon_py
 
 #Test
 #params = [0.0050, 0.0050, 67.6505, 0.1000, 1.0000]
@@ -19,6 +19,9 @@ ub = [5, 5, 300, 200, 400]  # upper bounds
 params_lb_log = np.log10(lb)
 params_ub_log = np.log10(ub)
 
+def random_point(params_lb_log, params_ub_log):
+    return np.random.uniform(params_lb_log, params_ub_log)
+
 def multistart(cost_function, N, params_lb_log, params_ub_log, t_data, data):
     x_star = None
     f_star = np.inf
@@ -27,21 +30,32 @@ def multistart(cost_function, N, params_lb_log, params_ub_log, t_data, data):
         print(f"Starting iteration {i + 1}")  # Check that the loop is running
 
         x_0 = random_point(params_lb_log, params_ub_log)
-        result = minimize(cost_function, x_0, args=(t_data, data), method='SLSQP')
+        print("start point ", i+1, ": ", np.power(x_0,10))
+        func = lambda x_0: cost_function(t_data, x_0, data)
+        out = fmincon_py(func, params_init_log=x_0, params_lb_log=params_lb_log, params_ub_log=params_ub_log,disp=False)
 
-        print(f"Optimizer finished, success: {result.success}")  # Check that the optimizer is running
-        if result.success and result.fun < f_star:
-            x_star = result.x
-            f_star = result.fun
+        print(f"Optimizer finished, success: {out['success']}")  # Check that the optimizer is running
+        if out["success"] and out["fun"] < f_star:
+            x_star = out["opt_params"]
+            f_star = out["fun"]
 
         print(f'Iteration: {i + 1}, Best cost so far: {f_star}, Best params so far: {x_star}')
 
+    print("Optimal parameters:", x_star)
+    print("Minimal cost:", f_star)
+
     return x_star, f_star
 
-def random_point(params_lb_log, params_ub_log):
-    return np.random.uniform(params_lb_log, params_ub_log)
 
 # Perform the multistart optimization
 params_optimal, minimal_cost = multistart(cost_function, 10, params_lb_log, params_ub_log, time, data)
-print("Optimal parameters:", params_optimal)
-print("Minimal cost:", minimal_cost)
+
+'''
+test di random_point
+1. verifica dei bound 
+2. matlab come funziona il random_point in multistart?
+3. np.random.uniform trova punti sempre diversi?
+
+multistart_py deve dirmi quante esecuzioni hanno avuto successo e dirmi a che punto è passo passo
+"sono all'esecuzione 1 di 7 e i miei punti iniziali sono... il valore calcolato è... i parametri calcolati sono..."
+'''

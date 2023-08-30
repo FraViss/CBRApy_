@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.interpolate as sp_interp
 from scipy.integrate import odeint, solve_ivp
+from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 
 
@@ -54,6 +55,40 @@ def cost_function(t_data, params_log, data):
     cTnT_sim = sp_interp.interp1d(t + params_log[-1], x3,bounds_error=False,fill_value="extrapolate")
     return np.sum(np.power(data - cTnT_sim(t_data), 2)*data)
 
+def fmincon_py(func, params_init_log, params_lb_log, params_ub_log, disp:bool=True) -> dict:
+    #func = lambda params_init_log: cost_function(time, params_init_log, data)
+
+    # Optimization problem
+    problem = {
+        'fun': func
+        , 'x0': params_init_log
+        , 'bounds': list(zip(params_lb_log, params_ub_log))
+        , 'method': 'SLSQP'
+        , 'options': {"disp": disp}
+    }
+    # Provare analoghi fmincon diversi da minimize
+
+    # Solve the optimization problem
+
+    result = minimize(**problem)
+
+    output = {
+        "fun" : result.fun,
+        "opt_params_log" : result.x,
+        "opt_params" : np.power(10, result.x),
+        "success" : result.success,
+        "status" : result.status,
+        "message" : result.message
+    }
+    if disp:
+        print("Cost value: ",output["fun"])
+        print("Optimal parameters log: ", output["opt_params_log"])
+        print("Optimal parameters: ", output["opt_params"])
+        print("Success: ", output["success"])
+        print("Status: ", output["status"])
+        print("Message: ", output["message"])
+
+    return output
 '''
 def obj_func(params_init_log, data, time):
     #params = 10 ** parameter_init
@@ -70,13 +105,19 @@ def obj_func(params_init_log, data, time):
 if __name__=="__main__":
     data = [1.4300, 1.0900, 0.9820, 1.2200, 1.2600, 0.5410]  # array concentrazione troponina
     time = [5.1333, 6.2833, 13.1833, 29.9167, 53.8500, 77.2167]  # array tempi di acquisizione troponina
-    parameter_init = [0.005, 0.005, 30, 0.1, 1]
+    #parameter_init = [0.005, 0.005, 30, 0.1, 1]
+    parameter_init = [2.5, 3, 155, 90, 220]
     params = np.log10(parameter_init)
+
+    lb = [0.001, 0.001, 20, 0.001, 0.1]  # lower bounds
+    ub = [5, 5, 300, 200, 400]  # upper bounds
+    params_lb_log = np.log10(lb)
+    params_ub_log = np.log10(ub)
 
     t_vec_stemi= np.linspace(0, max(time)*1.6, 201)
 
     #print(cost_function(time,params,data))
-
+    '''
     print("Test odefun non optimized.")
     print("parameter_init: ",parameter_init)
     print("log10_parameter_init: ",params)
@@ -144,7 +185,26 @@ if __name__=="__main__":
     plt.ylabel('Concentration of troponin')
     plt.legend()
     plt.show()
-
+    '''
+    print("Test fmincon_py")
+    print("parameter_init: ",parameter_init)
+    func = lambda params_init_log: cost_function(time, params_init_log, data)
+    out=fmincon_py(func,params_init_log=params,params_lb_log=params_lb_log,params_ub_log=params_ub_log)
+    print(out["opt_params"])
+    #Plot test fmincon_py
+    params_log = np.log10(out["opt_params"])
+    x0 = [10 ** params_log[-2], 10 ** params_log[-1], 0]
+    #t_vec_stemi = np.linspace(0, max(time) * 1.6, 201)
+    sol1 = solve_ivp(odefun, [t_vec_stemi[0], t_vec_stemi[-1]], x0, 'RK23', args=(params_log,), t_eval=t_vec_stemi)
+    x_1, x_2, x_3 = sol1.y
+    # Plot test
+    plt.figure()
+    plt.plot(t_vec_stemi, x_3, label='Locally py optim')
+    plt.title("Local SLSQP optimized")
+    plt.xlabel('Time')
+    plt.ylabel('Concentration of troponin')
+    plt.legend()
+    plt.show()
 
 '''
 fmincon ->  [0.4676, 0.1120, 70.2712, 8.1746, 3.4479] test: 0.0583
