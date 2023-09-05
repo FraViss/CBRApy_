@@ -42,6 +42,7 @@ function [T_stemi, X_stemi, params] = troponin_model(data, tempo, function_d, pa
         % ms.UseParallel = true;
         [params,obj_val] = run (ms, problem, number_point); %%%%%%%%%%%%%%%%%%%%%%%%
 %         disp(string(toc))
+        disp(obj_val)
     else
         %parameter_number = length(find(constant_vector == 0));
         parameter_number = 5;
